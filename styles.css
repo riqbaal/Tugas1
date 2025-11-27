@@ -1,0 +1,104 @@
+/* styles.css - PERBAIKAN STRUK */
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f0f2f5; color: #333; }
+.container { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-height: 80vh;}
+.hidden { display: none !important; }
+
+/* === LOGIN === */
+#login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; background: #2c3e50; }
+.login-box { padding: 40px; background: white; text-align: center; border-radius: 12px; width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.login-box input { margin-bottom: 15px; }
+
+/* === NAVIGATION === */
+nav { background: #1abc9c; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+nav h3 { margin: 0; }
+#logout-btn { background: #e74c3c; padding: 8px 15px; border-radius: 4px; }
+
+/* === TAB MENU === */
+.tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; }
+.tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: #ecf0f1; border-radius: 8px; font-weight: bold; transition: 0.3s; color: #555;}
+.tab-btn:hover { background: #bdc3c7; }
+.tab-btn.active { background: #2c3e50; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+/* === FORMS & INPUTS === */
+input, select, textarea { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+button { cursor: pointer; border: none; font-size: 14px; border-radius: 6px; transition: 0.2s; }
+button.primary { background: #27ae60; color: white; padding: 12px; width: 100%; font-weight: bold; margin-top: 10px; }
+button.primary:hover { background: #219150; }
+button.danger { background: #e74c3c; color: white; padding: 5px 10px; }
+button.add-cart { background: #3498db; color: white; padding: 10px; width: auto; margin-top: 0; }
+
+/* === TABLES === */
+table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
+th { background-color: #f8f9fa; color: #555; font-weight: 600; }
+
+/* === LAYOUT KASIR === */
+.kasir-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.card { background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
+.total-box { font-size: 24px; font-weight: bold; text-align: right; margin-top: 20px; color: #2c3e50; }
+.search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+.result-card { background: #fff; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+.result-price { font-size: 18px; font-weight: bold; color: #27ae60; }
+
+
+/* =========================================
+   PERBAIKAN CSS STRUK (AGAR TIDAK KEPOTONG)
+   ========================================= */
+
+/* Tampilan Struk di Layar (Preview) */
+#area-struk {
+    display: none; /* Sembunyi di dashboard biasa */
+    background: white;
+    width: 75mm; /* Lebar fix meniru kertas struk */
+    padding: 5mm;
+    font-family: 'Courier New', Courier, monospace;
+    color: #000;
+    box-sizing: border-box; /* Pastikan padding tidak nambah lebar */
+}
+
+/* Elemen Struk */
+.struk-header, .struk-footer { text-align: center; margin-bottom: 10px; }
+.struk-title { font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0; }
+.struk-info { font-size: 10px; color: #333; margin-bottom: 2px; }
+.garis-putus { border-bottom: 1px dashed #000; margin: 5px 0; }
+
+/* Tabel di dalam Struk */
+.struk-body table { 
+    width: 100%; 
+    font-size: 11px; 
+    border: none; 
+    border-collapse: collapse; 
+    table-layout: fixed; /* PENTING: Agar kolom harga tidak didorong keluar */
+}
+
+.struk-body td { border: none; padding: 2px 0; vertical-align: top; }
+/* Kolom Kiri (Qty x Harga) */
+.struk-body td:first-child { width: 60%; } 
+/* Kolom Kanan (Subtotal) */
+.struk-body td:last-child { width: 40%; text-align: right; white-space: nowrap; }
+
+.text-right { text-align: right; }
+.text-bold { font-weight: bold; }
+
+/* === SETTING KHUSUS SAAT PRINT (CTRL+P) === */
+@media print {
+    /* 1. Sembunyikan Dashboard */
+    #login-screen, #app-screen, nav, .container { display: none !important; }
+
+    /* 2. Reset Margin Kertas Browser */
+    @page { size: auto; margin: 0; }
+
+    /* 3. Atur Tampilan Struk */
+    body { background-color: white; margin: 0; padding: 0; }
+
+    #area-struk {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 72mm; /* Lebar aman untuk printer 80mm atau A4 */
+        margin-left: 2mm; /* Geser dikit dari tepi kertas */
+        padding: 0;
+        font-size: 11px;
+    }
+}

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Apotik Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color:#2c3e50">Apotik Login</h2>
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email Admin" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" id="btn-login-submit" class="primary">Login</button>
+            </form>
+            <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <div id="app-screen" class="hidden">
+        <nav class="no-print">
+            <h3>💊 Apotik Admin Panel</h3>
+            <button id="logout-btn">Keluar</button>
+        </nav>
+
+        <div class="container no-print">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('cek-harga')">🔍 Cek Harga</button>
+                <button class="tab-btn" onclick="showTab('kasir')">🛒 Kasir</button>
+                <button class="tab-btn" onclick="showTab('stok')">📦 Stok</button>
+                <button class="tab-btn" onclick="showTab('distributor')">🚚 Distributor</button>
+                <button class="tab-btn" onclick="showTab('laporan')">📊 Laporan</button>
+            </div>
+
+            <div id="tab-cek-harga" class="content-section">
+                <h2>Cek Harga & Stok Barang</h2>
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Ketik nama obat untuk mencari...">
+                </div>
+                <div id="search-results">
+                    <p style="color:#888; text-align:center;">Silakan ketik nama obat di atas.</p>
+                </div>
+            </div>
+
+            <div id="tab-kasir" class="content-section hidden">
+                <h2>Kasir Penjualan</h2>
+                <div class="kasir-layout">
+                    <div class="card">
+                        <h4>Pilih Produk</h4>
+                        <div style="display:flex; gap:10px;">
+                            <select id="pilih-obat-kasir" style="flex:2">
+                                <option value="">Pilih Obat...</option>
+                            </select>
+                            <input type="number" id="qty-kasir" value="1" min="1" style="width:80px">
+                            <button onclick="tambahKeKeranjang()" class="add-cart">Tambah</button>
+                        </div>
+                        <br>
+                        <h4>Keranjang Belanja</h4>
+                        <table>
+                            <thead><tr><th>Item</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr></thead>
+                            <tbody id="tabel-keranjang"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <h4>Pembayaran</h4>
+                        <div class="total-box">Total: <span id="label-total">Rp 0</span></div>
+                        <br>
+                        <label>Uang Diterima (Rp)</label>
+                        <input type="number" id="uang-bayar" placeholder="Masukkan nominal...">
+                        <div style="margin:10px 0; font-weight:bold" id="label-kembalian">Kembalian: Rp 0</div>
+                        
+                        <button onclick="prosesBayar()" class="primary">BAYAR & CETAK STRUK</button>
+                        <button onclick="resetKeranjang()" class="danger" style="width:100%; margin-top:5px;">Batal / Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-stok" class="content-section hidden">
+                <h2>Manajemen Stok Obat</h2>
+                <div class="card">
+                    <form id="form-stok">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <input type="text" id="nama-obat" placeholder="Nama Obat" required>
+                            <input type="number" id="harga-obat" placeholder="Harga Jual (Rp)" required>
+                            <input type="number" id="jumlah-obat" placeholder="Stok Awal" required>
+                            <select id="pilih-distributor-stok"><option value="-">Pilih Distributor</option></select>
+                        </div>
+                        <button type="submit" class="primary">Simpan Data Obat</button>
+                    </form>
+                </div>
+                <table>
+                    <thead><tr><th>Nama</th><th>Harga</th><th>Stok</th><th>Distributor</th><th>Aksi</th></tr></thead>
+                    <tbody id="tabel-stok"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-distributor" class="content-section hidden">
+                <h2>Data Distributor</h2>
+                <div class="card">
+                    <form id="form-distributor">
+                        <input type="text" id="nama-dist" placeholder="Nama CV / PT" required>
+                        <input type="text" id="kontak-dist" placeholder="No HP / Alamat" required>
+                        <button type="submit" class="primary">Tambah Distributor</button>
+                    </form>
+                </div>
+                <div id="list-distributor" style="margin-top:20px; display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px;"></div>
+            </div>
+
+            <div id="tab-laporan" class="content-section hidden">
+                <h2>Laporan Keuangan</h2>
+                <div class="card" style="background:#fff3cd; border-color:#ffeeba">
+                    <h4>Catat Pengeluaran</h4>
+                    <form id="form-pengeluaran" style="display:flex; gap:10px;">
+                        <input type="text" id="ket-pengeluaran" placeholder="Keterangan" required style="flex:2">
+                        <input type="number" id="biaya-pengeluaran" placeholder="Biaya (Rp)" required style="flex:1">
+                        <button type="submit" class="danger" style="width:auto; margin-top:8px;">Simpan</button>
+                    </form>
+                </div>
+                <br>
+                <table>
+                    <thead><tr><th>Tanggal</th><th>Tipe</th><th>Detail</th><th>Nominal</th></tr></thead>
+                    <tbody id="tabel-laporan"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="area-struk">
+        <div class="struk-header">
+            <h2 class="struk-title">APOTIK SEHAT</h2>
+            <div class="struk-info">Jl. Mawar No. 123, Indonesia</div>
+            <div class="struk-info">Telp: 0812-3456-7890</div>
+        </div>
+        
+        <div class="garis-putus"></div>
+        
+        <div class="struk-body">
+            <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:5px;">
+                <span id="struk-date"></span>
+                <span>Kasir: Admin</span>
+            </div>
+
+            <table id="struk-list-items">
+                </table>
+
+            <div class="garis-putus"></div>
+
+            <table>
+                <tr>
+                    <td class="text-bold">TOTAL</td>
+                    <td class="text-right text-bold" id="struk-grand-total">Rp 0</td>
+                </tr>
+                <tr>
+                    <td>BAYAR</td>
+                    <td class="text-right" id="struk-cash">Rp 0</td>
+                </tr>
+                <tr>
+                    <td>KEMBALI</td>
+                    <td class="text-right" id="struk-change">Rp 0</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="garis-putus"></div>
+
+        <div class="struk-footer">
+            <div class="struk-info">Terima Kasih & Semoga Lekas Sembuh</div>
+            <div class="struk-info" style="margin-top:5px;">*** LUNAS ***</div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 1. IMPORT FIREBASE LENGKAP DI SINI (Hapus auth.js)
+        import { db, auth } from "./firebaseConfig.js"; 
+        import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // === 2. LOGIKA LOGIN & LOGOUT (DIPINDAHKAN KE SINI) ===
+        
+        // Cek apakah user sedang login atau tidak (Realtime Listener)
+        onAuthStateChanged(auth, (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const appScreen = document.getElementById('app-screen');
+
+            if (user) {
+                // User Login -> Sembunyikan Login, Tampilkan App
+                console.log("User Login: ", user.email);
+                loginScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+            } else {
+                // User Logout -> Tampilkan Login, Sembunyikan App
+                console.log("User Logout");
+                loginScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            }
+        });
+
+        // Event Tombol Login
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btnLogin = document.getElementById('btn-login-submit');
+            const errorMsg = document.getElementById('login-error');
+
+            // UI Loading
+            btnLogin.innerText = "Loading...";
+            btnLogin.disabled = true;
+            errorMsg.innerText = "";
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Login Berhasil (onAuthStateChanged akan handle UI)
+                    btnLogin.innerText = "Login";
+                    btnLogin.disabled = false;
+                })
+                .catch((error) => {
+                    console.error("Login Error:", error);
+                    btnLogin.innerText = "Login";
+                    btnLogin.disabled = false;
+                    
+                    // Tampilkan Pesan Error
+                    let pesan = "Login Gagal. ";
+                    if(error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                        pesan += "Email atau Password salah.";
+                    } else if (error.code === 'auth/network-request-failed') {
+                        pesan += "Periksa koneksi internet.";
+                    } else {
+                        pesan += error.message; 
+                    }
+                    errorMsg.innerText = pesan;
+                    alert(pesan); // Alert popup juga biar kelihatan
+                });
+        });
+
+        // Event Tombol Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            if(confirm("Yakin ingin keluar?")) {
+                signOut(auth).then(() => console.log("Berhasil Logout"));
+            }
+        });
+
+
+        // === 3. LOGIKA APLIKASI APOTIK (Original) ===
+        let productsMap = {}; 
+        let keranjang = [];
+        let totalBelanja = 0;
+
+        window.hapusProduk = async (id) => {
+            if(confirm("Yakin ingin menghapus data ini?")) {
+                try {
+                    await deleteDoc(doc(db, "produk", id));
+                    alert("Berhasil dihapus!");
+                } catch (error) {
+                    alert("Gagal menghapus: " + error.message);
+                }
+            }
+        };
+
+        window.showTab = (tabName) => {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                if(btn.innerText.toLowerCase().includes(tabName.replace('-', ' '))) {
+                    btn.classList.add('active');
+                }
+            });
+        };
+
+        // LOAD DISTRIBUTOR
+        onSnapshot(collection(db, "distributor"), (snap) => {
+            const select = document.getElementById('pilih-distributor-stok');
+            const list = document.getElementById('list-distributor');
+            // Cek elemen ada dulu biar gak error saat masih di login screen
+            if(select && list) {
+                select.innerHTML = '<option value="-">Pilih Distributor</option>';
+                list.innerHTML = '';
+                snap.forEach(d => {
+                    const data = d.data();
+                    select.innerHTML += `<option value="${data.nama}">${data.nama}</option>`;
+                    list.innerHTML += `<div style="border:1px solid #ddd; padding:10px; border-radius:5px; background:white;"><b>${data.nama}</b><br><small>${data.kontak}</small></div>`;
+                });
+            }
+        });
+
+        document.getElementById('form-distributor').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "distributor"), {
+                nama: document.getElementById('nama-dist').value,
+                kontak: document.getElementById('kontak-dist').value
+            });
+            e.target.reset();
+        });
+
+        // LOAD PRODUK
+        onSnapshot(collection(db, "produk"), (snap) => {
+            const tbody = document.getElementById('tabel-stok');
+            const selectKasir = document.getElementById('pilih-obat-kasir');
+            
+            if(tbody && selectKasir) {
+                tbody.innerHTML = '';
+                selectKasir.innerHTML = '<option value="">Pilih Obat...</option>';
+                productsMap = {};
+
+                snap.forEach(d => {
+                    const item = d.data();
+                    const id = d.id;
+                    productsMap[id] = { ...item, id };
+
+                    let statusStok = item.stok < 5 ? `<b style="color:red">${item.stok} (Kritis)</b>` : item.stok;
+                    tbody.innerHTML += `<tr>
+                        <td>${item.nama}</td>
+                        <td>Rp ${item.harga.toLocaleString()}</td>
+                        <td>${statusStok}</td>
+                        <td>${item.distributor}</td>
+                        <td><button onclick="hapusProduk('${id}')" class="danger">Hapus</button></td>
+                    </tr>`;
+
+                    if(item.stok > 0) {
+                        selectKasir.innerHTML += `<option value="${id}">${item.nama} - Rp ${item.harga.toLocaleString()} (Stok: ${item.stok})</option>`;
+                    }
+                });
+            }
+        });
+
+        document.getElementById('form-stok').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "produk"), {
+                nama: document.getElementById('nama-obat').value,
+                harga: Number(document.getElementById('harga-obat').value),
+                stok: Number(document.getElementById('jumlah-obat').value),
+                distributor: document.getElementById('pilih-distributor-stok').value
+            });
+            e.target.reset();
+            alert("Data obat disimpan!");
+        });
+
+        // CEK HARGA
+        document.getElementById('search-input').addEventListener('keyup', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            const resultDiv = document.getElementById('search-results');
+            resultDiv.innerHTML = '';
+            if(keyword.length < 1) return;
+
+            Object.values(productsMap).forEach(p => {
+                if(p.nama.toLowerCase().includes(keyword)) {
+                    const color = p.stok > 0 ? '#27ae60' : '#e74c3c';
+                    resultDiv.innerHTML += `
+                    <div class="result-card">
+                        <div>
+                            <strong>${p.nama}</strong><br>
+                            <small>Stok: <span style="color:${color}; font-weight:bold">${p.stok}</span></small>
+                        </div>
+                        <div class="result-price">Rp ${p.harga.toLocaleString()}</div>
+                    </div>`;
+                }
+            });
+        });
+
+        // KASIR & TRANSAKSI
+        window.tambahKeKeranjang = () => {
+            const id = document.getElementById('pilih-obat-kasir').value;
+            const qty = Number(document.getElementById('qty-kasir').value);
+            
+            if(!id) return alert("Pilih obat dulu!");
+            
+            const produk = productsMap[id];
+            const cekKeranjang = keranjang.find(k => k.id === id);
+            const currentQty = cekKeranjang ? cekKeranjang.qty : 0;
+            
+            if(produk.stok < (currentQty + qty)){
+                 return alert("Stok tidak cukup!");
+            }
+
+            if(cekKeranjang) {
+                cekKeranjang.qty += qty;
+                cekKeranjang.subtotal = cekKeranjang.qty * produk.harga;
+            } else {
+                keranjang.push({
+                    id: id,
+                    nama: produk.nama,
+                    harga: produk.harga,
+                    qty: qty,
+                    subtotal: qty * produk.harga
+                });
+            }
+            renderKeranjang();
+        };
+
+        function renderKeranjang() {
+            const tbody = document.getElementById('tabel-keranjang');
+            tbody.innerHTML = '';
+            totalBelanja = 0;
+
+            keranjang.forEach((item, index) => {
+                totalBelanja += item.subtotal;
+                tbody.innerHTML += `<tr>
+                    <td>${item.nama}</td>
+                    <td>${item.qty}</td>
+                    <td>${item.subtotal.toLocaleString()}</td>
+                    <td><button onclick="hapusItemKeranjang(${index})" class="danger">X</button></td>
+                </tr>`;
+            });
+
+            document.getElementById('label-total').innerText = `Rp ${totalBelanja.toLocaleString()}`;
+            hitungKembalian();
+        }
+
+        window.hapusItemKeranjang = (index) => {
+            keranjang.splice(index, 1);
+            renderKeranjang();
+        };
+
+        window.resetKeranjang = () => {
+            keranjang = [];
+            renderKeranjang();
+            document.getElementById('uang-bayar').value = '';
+            document.getElementById('label-total').innerText = 'Rp 0';
+            document.getElementById('label-kembalian').innerText = 'Kembalian: Rp 0';
+        };
+
+        document.getElementById('uang-bayar').addEventListener('keyup', hitungKembalian);
+        function hitungKembalian() {
+            const bayar = Number(document.getElementById('uang-bayar').value);
+            const kembali = bayar - totalBelanja;
+            document.getElementById('label-kembalian').innerText = `Kembalian: Rp ${kembali.toLocaleString()}`;
+        }
+
+        window.prosesBayar = async () => {
+            if(keranjang.length === 0) return alert("Keranjang kosong!");
+            const bayar = Number(document.getElementById('uang-bayar').value);
+            if(bayar < totalBelanja) return alert("Uang kurang!");
+            if(!confirm("Cetak Struk?")) return;
+
+            const batchTime = Timestamp.now();
+            let detailBarang = "";
+
+            for (const item of keranjang) {
+                const produkRef = doc(db, "produk", item.id);
+                const currentData = productsMap[item.id]; 
+                await updateDoc(produkRef, { stok: currentData.stok - item.qty });
+                detailBarang += `${item.nama} x${item.qty}, `;
+            }
+
+            await addDoc(collection(db, "transaksi"), {
+                tipe: "masuk",
+                keterangan: detailBarang.slice(0, -2),
+                nominal: totalBelanja,
+                tanggal: batchTime
+            });
+
+            cetakStruk(bayar, bayar - totalBelanja, batchTime);
+            resetKeranjang();
+        };
+
+        function cetakStruk(bayar, kembali, waktu) {
+            const dateObj = waktu.toDate ? waktu.toDate() : new Date();
+            document.getElementById('struk-date').innerText = dateObj.toLocaleString('id-ID');
+
+            const listTable = document.getElementById('struk-list-items');
+            listTable.innerHTML = '';
+            
+            keranjang.forEach(item => {
+                const row = `
+                <tr>
+                    <td colspan="2" style="padding-top:5px; font-weight:bold;">${item.nama}</td>
+                </tr>
+                <tr>
+                    <td>${item.qty} x ${item.harga.toLocaleString()}</td>
+                    <td class="text-right">${item.subtotal.toLocaleString()}</td>
+                </tr>`;
+                listTable.innerHTML += row;
+            });
+
+            document.getElementById('struk-grand-total').innerText = "Rp " + totalBelanja.toLocaleString();
+            document.getElementById('struk-cash').innerText = "Rp " + bayar.toLocaleString();
+            document.getElementById('struk-change').innerText = "Rp " + kembali.toLocaleString();
+
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        // LAPORAN
+        document.getElementById('form-pengeluaran').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "transaksi"), {
+                tipe: "keluar",
+                keterangan: document.getElementById('ket-pengeluaran').value,
+                nominal: Number(document.getElementById('biaya-pengeluaran').value),
+                tanggal: Timestamp.now()
+            });
+            e.target.reset();
+        });
+
+        onSnapshot(query(collection(db, "transaksi"), orderBy("tanggal", "desc")), (snap) => {
+            const tbody = document.getElementById('tabel-laporan');
+            if(tbody) {
+                tbody.innerHTML = '';
+                snap.forEach(d => {
+                    const data = d.data();
+                    const color = data.tipe === 'masuk' ? 'green' : 'red';
+                    const sign = data.tipe === 'masuk' ? '+' : '-';
+                    tbody.innerHTML += `<tr>
+                        <td>${data.tanggal.toDate().toLocaleDateString()}</td>
+                        <td><span style="color:${color}; font-weight:bold; text-transform:uppercase">${data.tipe}</span></td>
+                        <td>${data.keterangan}</td>
+                        <td style="color:${color}">${sign} Rp ${data.nominal.toLocaleString()}</td>
+                    </tr>`;
+                });
+            }
+        });
+
+    </script>
+</body>
+</html>
