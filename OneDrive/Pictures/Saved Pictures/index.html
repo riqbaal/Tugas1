@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Apotik Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color:#2c3e50">Apotik Login</h2>
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email Admin" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" id="btn-login-submit" class="primary">Login</button>
+            </form>
+            <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <div id="app-screen" class="hidden">
+        <nav class="no-print">
+            <h3>💊 Apotik Admin Panel</h3>
+            <button id="logout-btn">Keluar</button>
+        </nav>
+
+        <div class="container no-print">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('cek-harga')">🔍 Cek Harga</button>
+                <button class="tab-btn" onclick="showTab('kasir')">🛒 Kasir</button>
+                <button class="tab-btn" onclick="showTab('stok')">📦 Stok</button>
+                <button class="tab-btn" onclick="showTab('distributor')">🚚 Distributor</button>
+                <button class="tab-btn" onclick="showTab('laporan')">📊 Laporan</button>
+            </div>
+
+            <div id="tab-cek-harga" class="content-section">
+                <h2>Cek Harga & Stok Barang</h2>
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Ketik nama obat untuk mencari...">
+                </div>
+                <div id="search-results">
+                    <p style="color:#888; text-align:center;">Silakan ketik nama obat di atas.</p>
+                </div>
+            </div>
+
+            <div id="tab-kasir" class="content-section hidden">
+                <h2>Kasir Penjualan</h2>
+                <div class="kasir-layout">
+                    <div class="card">
+                        <h4>Pilih Produk</h4>
+                        <div style="display:flex; gap:10px;">
+                            <select id="pilih-obat-kasir" style="flex:2"><option value="">Pilih Obat...</option></select>
+                            <input type="number" id="qty-kasir" value="1" min="1" style="width:80px">
+                            <button onclick="tambahKeKeranjang()" class="add-cart">Tambah</button>
+                        </div>
+                        <br>
+                        <h4>Keranjang Belanja</h4>
+                        <table>
+                            <thead><tr><th>Item</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr></thead>
+                            <tbody id="tabel-keranjang"></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h4>Pembayaran</h4>
+                        <div class="total-box">Total: <span id="label-total">Rp 0</span></div>
+                        <br>
+                        <label>Uang Diterima (Rp)</label>
+                        <input type="number" id="uang-bayar" placeholder="Masukkan nominal...">
+                        <div style="margin:10px 0; font-weight:bold" id="label-kembalian">Kembalian: Rp 0</div>
+                        <button onclick="prosesBayar()" class="primary">BAYAR & CETAK STRUK</button>
+                        <button onclick="resetKeranjang()" class="danger" style="width:100%; margin-top:5px;">Batal / Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-stok" class="content-section hidden">
+                <h2>Manajemen Stok Obat</h2>
+                <div class="card">
+                    <form id="form-stok">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <input type="text" id="nama-obat" placeholder="Nama Obat" required>
+                            <input type="number" id="harga-obat" placeholder="Harga Jual" required>
+                            <input type="number" id="jumlah-obat" placeholder="Stok" required>
+                            <select id="pilih-distributor-stok"><option value="-">Pilih Distributor</option></select>
+                        </div>
+                        <button type="submit" class="primary">Simpan Data Obat</button>
+                    </form>
+                </div>
+                <table>
+                    <thead><tr><th>Nama</th><th>Harga</th><th>Stok</th><th>Distributor</th><th>Aksi</th></tr></thead>
+                    <tbody id="tabel-stok"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-distributor" class="content-section hidden">
+                <h2>Data Distributor</h2>
+                <div class="card">
+                    <form id="form-distributor">
+                        <input type="text" id="nama-dist" placeholder="Nama CV / PT" required>
+                        <input type="text" id="kontak-dist" placeholder="No HP" required>
+                        <button type="submit" class="primary">Tambah Distributor</button>
+                    </form>
+                </div>
+                <div id="list-distributor" style="margin-top:20px; display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px;"></div>
+            </div>
+
+            <div id="tab-laporan" class="content-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2>Laporan Keuangan</h2>
+                    <button onclick="cetakLaporan()" style="background:#3498db; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">🖨️ Cetak Laporan PDF</button>
+                </div>
+                
+                <div class="card" style="background:#fff3cd; border-color:#ffeeba">
+                    <h4>Catat Pengeluaran</h4>
+                    <form id="form-pengeluaran" style="display:flex; gap:10px;">
+                        <input type="text" id="ket-pengeluaran" placeholder="Keterangan" required style="flex:2">
+                        <input type="number" id="biaya-pengeluaran" placeholder="Biaya (Rp)" required style="flex:1">
+                        <button type="submit" class="danger" style="width:auto; margin-top:8px;">Simpan</button>
+                    </form>
+                </div>
+                <br>
+                <table>
+                    <thead><tr><th>Tanggal</th><th>Tipe</th><th>Detail</th><th>Nominal</th></tr></thead>
+                    <tbody id="tabel-laporan"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="area-struk">
+        <div class="struk-header">
+            <h2 class="struk-title">APOTIK SEHAT</h2>
+            <div class="struk-info">Jl. Mawar No. 123, Indonesia</div>
+            <div class="struk-info">Telp: 0812-3456-7890</div>
+        </div>
+        <div class="garis-putus"></div>
+        <div class="struk-body">
+            <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:5px;">
+                <span id="struk-date"></span><span>Kasir: Admin</span>
+            </div>
+            <table id="struk-list-items"></table>
+            <div class="garis-putus"></div>
+            <table>
+                <tr><td class="text-bold">TOTAL</td><td class="text-right text-bold" id="struk-grand-total">Rp 0</td></tr>
+                <tr><td>BAYAR</td><td class="text-right" id="struk-cash">Rp 0</td></tr>
+                <tr><td>KEMBALI</td><td class="text-right" id="struk-change">Rp 0</td></tr>
+            </table>
+        </div>
+        <div class="garis-putus"></div>
+        <div class="struk-footer">
+            <div class="struk-info">Terima Kasih & Semoga Lekas Sembuh</div>
+        </div>
+    </div>
+
+    <div id="area-laporan-print">
+        <div class="judul-laporan">
+            <h2>LAPORAN KEUANGAN APOTIK SEHAT</h2>
+            <p>Periode: Semua Transaksi</p>
+            <p id="tgl-cetak-laporan" style="font-size:12px;"></p>
+        </div>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th style="width:15%">Tanggal</th>
+                    <th style="width:10%">Tipe</th>
+                    <th>Keterangan</th>
+                    <th style="width:20%">Nominal (Rp)</th>
+                </tr>
+            </thead>
+            <tbody id="tabel-laporan-print">
+                </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align:right; font-weight:bold;">Total Pemasukan</td>
+                    <td id="total-masuk-print">Rp 0</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:right; font-weight:bold;">Total Pengeluaran</td>
+                    <td id="total-keluar-print">Rp 0</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:right; font-weight:bold;">LABA BERSIH</td>
+                    <td id="laba-bersih-print" style="font-weight:bold; font-size:14px;">Rp 0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <script type="module">
+        import { db, auth } from "./firebaseconfig.js";
+        import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // === AUTH & LOGIN ===
+        onAuthStateChanged(auth, (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const appScreen = document.getElementById('app-screen');
+            if (user) {
+                loginScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+            } else {
+                loginScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            }
+        });
+
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btnLogin = document.getElementById('btn-login-submit');
+            const errorMsg = document.getElementById('login-error');
+
+            btnLogin.innerText = "Loading...";
+            btnLogin.disabled = true;
+            errorMsg.innerText = "";
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    btnLogin.innerText = "Login";
+                    btnLogin.disabled = false;
+                })
+                .catch((error) => {
+                    btnLogin.innerText = "Login";
+                    btnLogin.disabled = false;
+                    errorMsg.innerText = "Login Gagal: " + error.message;
+                });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            if(confirm("Yakin ingin keluar?")) signOut(auth);
+        });
+
+        // === LOGIKA BISNIS ===
+        let productsMap = {}; 
+        let keranjang = [];
+        let totalBelanja = 0;
+        let laporanData = []; // Simpan data laporan untuk dicetak
+
+        window.hapusProduk = async (id) => {
+            if(confirm("Hapus data?")) {
+                try { await deleteDoc(doc(db, "produk", id)); alert("Terhapus!"); }
+                catch(e) { alert("Gagal: " + e.message); }
+            }
+        };
+
+        window.showTab = (tabName) => {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if(btn.innerText.toLowerCase().includes(tabName.replace('-', ' '))) btn.classList.add('active');
+            });
+        };
+
+        // Realtime Data Listeners
+        onSnapshot(collection(db, "distributor"), (snap) => {
+            const select = document.getElementById('pilih-distributor-stok');
+            const list = document.getElementById('list-distributor');
+            if(select && list) {
+                select.innerHTML = '<option value="-">Pilih Distributor</option>';
+                list.innerHTML = '';
+                snap.forEach(d => {
+                    const data = d.data();
+                    select.innerHTML += `<option value="${data.nama}">${data.nama}</option>`;
+                    list.innerHTML += `<div style="border:1px solid #ddd; padding:10px; background:white;"><b>${data.nama}</b><br><small>${data.kontak}</small></div>`;
+                });
+            }
+        });
+
+        document.getElementById('form-distributor').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "distributor"), {
+                nama: document.getElementById('nama-dist').value,
+                kontak: document.getElementById('kontak-dist').value
+            });
+            e.target.reset();
+        });
+
+        onSnapshot(collection(db, "produk"), (snap) => {
+            const tbody = document.getElementById('tabel-stok');
+            const selectKasir = document.getElementById('pilih-obat-kasir');
+            if(tbody && selectKasir) {
+                tbody.innerHTML = '';
+                selectKasir.innerHTML = '<option value="">Pilih Obat...</option>';
+                productsMap = {};
+                snap.forEach(d => {
+                    const item = d.data();
+                    const id = d.id;
+                    productsMap[id] = { ...item, id };
+                    let statusStok = item.stok < 5 ? `<b style="color:red">${item.stok} (Kritis)</b>` : item.stok;
+                    tbody.innerHTML += `<tr><td>${item.nama}</td><td>Rp ${item.harga.toLocaleString()}</td><td>${statusStok}</td><td>${item.distributor}</td><td><button onclick="hapusProduk('${id}')" class="danger">Hapus</button></td></tr>`;
+                    if(item.stok > 0) selectKasir.innerHTML += `<option value="${id}">${item.nama} - Rp ${item.harga.toLocaleString()} (Stok: ${item.stok})</option>`;
+                });
+            }
+        });
+
+        document.getElementById('form-stok').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "produk"), {
+                nama: document.getElementById('nama-obat').value,
+                harga: Number(document.getElementById('harga-obat').value),
+                stok: Number(document.getElementById('jumlah-obat').value),
+                distributor: document.getElementById('pilih-distributor-stok').value
+            });
+            e.target.reset();
+            alert("Disimpan!");
+        });
+
+        document.getElementById('search-input').addEventListener('keyup', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            const resultDiv = document.getElementById('search-results');
+            resultDiv.innerHTML = '';
+            if(keyword.length < 1) return;
+            Object.values(productsMap).forEach(p => {
+                if(p.nama.toLowerCase().includes(keyword)) {
+                    const color = p.stok > 0 ? '#27ae60' : '#e74c3c';
+                    resultDiv.innerHTML += `<div class="result-card"><div><strong>${p.nama}</strong><br><small>Stok: <span style="color:${color}; font-weight:bold">${p.stok}</span></small></div><div class="result-price">Rp ${p.harga.toLocaleString()}</div></div>`;
+                }
+            });
+        });
+
+        window.tambahKeKeranjang = () => {
+            const id = document.getElementById('pilih-obat-kasir').value;
+            const qty = Number(document.getElementById('qty-kasir').value);
+            if(!id) return alert("Pilih obat!");
+            const produk = productsMap[id];
+            const cekKeranjang = keranjang.find(k => k.id === id);
+            const currentQty = cekKeranjang ? cekKeranjang.qty : 0;
+            if(produk.stok < (currentQty + qty)) return alert("Stok kurang!");
+
+            if(cekKeranjang) {
+                cekKeranjang.qty += qty;
+                cekKeranjang.subtotal = cekKeranjang.qty * produk.harga;
+            } else {
+                keranjang.push({ id: id, nama: produk.nama, harga: produk.harga, qty: qty, subtotal: qty * produk.harga });
+            }
+            renderKeranjang();
+        };
+
+        function renderKeranjang() {
+            const tbody = document.getElementById('tabel-keranjang');
+            tbody.innerHTML = '';
+            totalBelanja = 0;
+            keranjang.forEach((item, index) => {
+                totalBelanja += item.subtotal;
+                tbody.innerHTML += `<tr><td>${item.nama}</td><td>${item.qty}</td><td>${item.subtotal.toLocaleString()}</td><td><button onclick="hapusItemKeranjang(${index})" class="danger">X</button></td></tr>`;
+            });
+            document.getElementById('label-total').innerText = `Rp ${totalBelanja.toLocaleString()}`;
+            hitungKembalian();
+        }
+
+        window.hapusItemKeranjang = (index) => {
+            keranjang.splice(index, 1);
+            renderKeranjang();
+        };
+
+        window.resetKeranjang = () => {
+            keranjang = [];
+            renderKeranjang();
+            document.getElementById('uang-bayar').value = '';
+            document.getElementById('label-total').innerText = 'Rp 0';
+            document.getElementById('label-kembalian').innerText = 'Kembalian: Rp 0';
+        };
+
+        document.getElementById('uang-bayar').addEventListener('keyup', hitungKembalian);
+        function hitungKembalian() {
+            const bayar = Number(document.getElementById('uang-bayar').value);
+            document.getElementById('label-kembalian').innerText = `Kembalian: Rp ${(bayar - totalBelanja).toLocaleString()}`;
+        }
+
+        window.prosesBayar = async () => {
+            if(keranjang.length === 0) return alert("Keranjang kosong!");
+            const bayar = Number(document.getElementById('uang-bayar').value);
+            if(bayar < totalBelanja) return alert("Uang kurang!");
+            if(!confirm("Cetak Struk?")) return;
+
+            const batchTime = Timestamp.now();
+            let detailBarang = "";
+            for (const item of keranjang) {
+                const produkRef = doc(db, "produk", item.id);
+                const currentData = productsMap[item.id]; 
+                await updateDoc(produkRef, { stok: currentData.stok - item.qty });
+                detailBarang += `${item.nama} x${item.qty}, `;
+            }
+
+            await addDoc(collection(db, "transaksi"), {
+                tipe: "masuk",
+                keterangan: detailBarang.slice(0, -2),
+                nominal: totalBelanja,
+                tanggal: batchTime
+            });
+
+            cetakStruk(bayar, bayar - totalBelanja, batchTime);
+            resetKeranjang();
+        };
+
+        function cetakStruk(bayar, kembali, waktu) {
+            document.getElementById('struk-date').innerText = waktu.toDate().toLocaleString('id-ID');
+            const listTable = document.getElementById('struk-list-items');
+            listTable.innerHTML = '';
+            keranjang.forEach(item => {
+                listTable.innerHTML += `<tr><td colspan="2" style="font-weight:bold;">${item.nama}</td></tr><tr><td>${item.qty} x ${item.harga.toLocaleString()}</td><td class="text-right">${item.subtotal.toLocaleString()}</td></tr>`;
+            });
+            document.getElementById('struk-grand-total').innerText = "Rp " + totalBelanja.toLocaleString();
+            document.getElementById('struk-cash').innerText = "Rp " + bayar.toLocaleString();
+            document.getElementById('struk-change').innerText = "Rp " + kembali.toLocaleString();
+            
+            // Hapus class printing-laporan jika ada bekas cetak laporan
+            document.body.classList.remove('printing-laporan');
+            setTimeout(() => { window.print(); }, 300);
+        }
+
+        // === LAPORAN ===
+        document.getElementById('form-pengeluaran').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "transaksi"), {
+                tipe: "keluar",
+                keterangan: document.getElementById('ket-pengeluaran').value,
+                nominal: Number(document.getElementById('biaya-pengeluaran').value),
+                tanggal: Timestamp.now()
+            });
+            e.target.reset();
+        });
+
+        // Load Laporan Realtime & Simpan ke Array LaporanData
+        onSnapshot(query(collection(db, "transaksi"), orderBy("tanggal", "desc")), (snap) => {
+            const tbody = document.getElementById('tabel-laporan');
+            laporanData = []; // Reset array
+            
+            if(tbody) {
+                tbody.innerHTML = '';
+                snap.forEach(d => {
+                    const data = d.data();
+                    laporanData.push(data); // Simpan data
+                    
+                    const color = data.tipe === 'masuk' ? 'green' : 'red';
+                    const sign = data.tipe === 'masuk' ? '+' : '-';
+                    tbody.innerHTML += `<tr>
+                        <td>${data.tanggal.toDate().toLocaleDateString()}</td>
+                        <td><span style="color:${color}; font-weight:bold; text-transform:uppercase">${data.tipe}</span></td>
+                        <td>${data.keterangan}</td>
+                        <td style="color:${color}">${sign} Rp ${data.nominal.toLocaleString()}</td>
+                    </tr>`;
+                });
+            }
+        });
+
+        // === FUNGSI CETAK LAPORAN ===
+        window.cetakLaporan = () => {
+            if(laporanData.length === 0) return alert("Belum ada data transaksi!");
+
+            const tbodyPrint = document.getElementById('tabel-laporan-print');
+            tbodyPrint.innerHTML = '';
+            
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
+            laporanData.forEach(data => {
+                if(data.tipe === 'masuk') totalMasuk += data.nominal;
+                else totalKeluar += data.nominal;
+
+                const color = data.tipe === 'masuk' ? 'green' : 'red';
+                const sign = data.tipe === 'masuk' ? '+' : '-';
+                
+                tbodyPrint.innerHTML += `<tr>
+                    <td>${data.tanggal.toDate().toLocaleString('id-ID')}</td>
+                    <td style="text-transform:uppercase">${data.tipe}</td>
+                    <td>${data.keterangan}</td>
+                    <td style="color:${color}">${sign} Rp ${data.nominal.toLocaleString()}</td>
+                </tr>`;
+            });
+
+            // Isi Summary
+            document.getElementById('total-masuk-print').innerText = "Rp " + totalMasuk.toLocaleString();
+            document.getElementById('total-keluar-print').innerText = "Rp " + totalKeluar.toLocaleString();
+            
+            const laba = totalMasuk - totalKeluar;
+            const elLaba = document.getElementById('laba-bersih-print');
+            elLaba.innerText = "Rp " + laba.toLocaleString();
+            elLaba.style.color = laba >= 0 ? 'green' : 'red';
+
+            document.getElementById('tgl-cetak-laporan').innerText = "Dicetak pada: " + new Date().toLocaleString('id-ID');
+
+            // Tambahkan class khusus ke body untuk memicu CSS print laporan
+            document.body.classList.add('printing-laporan');
+
+            setTimeout(() => {
+                window.print();
+                // Hapus class setelah print selesai (agar kembali normal jika cancel)
+                setTimeout(() => {
+                    document.body.classList.remove('printing-laporan');
+                }, 1000);
+            }, 300);
+        };
+
+    </script>
+</body>
+</html>
